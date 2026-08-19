@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../constants/spacing';
@@ -19,7 +19,15 @@ export default function CategoryCard({ category, isSelected, onPress, variant = 
         activeOpacity={0.7}
       >
         <View style={[styles.gridIconContainer, { backgroundColor: theme.colors.surfaceSecondary }]}>
-          <Ionicons name={category.icon} size={28} color={theme.colors.primary} />
+          {category.image ? (
+            <Image 
+              source={{ uri: category.image }} 
+              style={styles.gridImage} 
+              resizeMode="cover" 
+            />
+          ) : (
+            <Ionicons name={category.icon} size={28} color={theme.colors.primary} />
+          )}
         </View>
         <Text style={[styles.gridName, { color: theme.colors.textPrimary }]}>{category.name}</Text>
         <Text style={[styles.gridCount, { color: theme.colors.textSecondary }]}>{category.count || 'Explore'}</Text>
@@ -36,12 +44,26 @@ export default function CategoryCard({ category, isSelected, onPress, variant = 
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={[styles.iconWrapper, { backgroundColor: isSelected ? theme.colors.primary : theme.colors.surfaceSecondary }]}>
-        <Ionicons 
-          name={category.icon || "list"} 
-          size={28} 
-          color={isSelected ? '#FFFFFF' : theme.colors.primary} 
-        />
+      <View style={[
+        styles.iconWrapper, 
+        { 
+          backgroundColor: isSelected ? theme.colors.primary : theme.colors.surfaceSecondary,
+          overflow: 'hidden'
+        }
+      ]}>
+        {category.image ? (
+          <Image 
+            source={{ uri: category.image }} 
+            style={[styles.chipImage, isSelected ? styles.chipImageSelected : null]} 
+            resizeMode="cover" 
+          />
+        ) : (
+          <Ionicons 
+            name={category.icon || "list"} 
+            size={28} 
+            color={isSelected ? '#FFFFFF' : theme.colors.primary} 
+          />
+        )}
       </View>
       <Text style={[
         styles.chipName,
@@ -112,5 +134,18 @@ const styles = StyleSheet.create({
   gridCount: {
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.medium,
+  },
+  chipImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.9,
+  },
+  chipImageSelected: {
+    opacity: 1,
+  },
+  gridImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 32,
   }
 });

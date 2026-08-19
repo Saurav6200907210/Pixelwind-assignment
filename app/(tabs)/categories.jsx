@@ -12,10 +12,12 @@ export default function CategoriesScreen() {
   const { theme } = useTheme();
   const router = useRouter();
 
-  const categoriesWithCounts = categories.map(cat => ({
-    ...cat,
-    count: `${products.filter(p => p.category === cat.name).length} products`
-  }));
+  const categoriesWithCounts = categories
+    .filter(cat => cat.id !== 'all')
+    .map(cat => ({
+      ...cat,
+      count: `${products.filter(p => p.category === cat.name).length} products`
+    }));
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

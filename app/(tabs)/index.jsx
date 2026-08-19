@@ -315,12 +315,6 @@ export default function HomeScreen() {
                 style={styles.horizontalScroll}
                 contentContainerStyle={styles.horizontalScrollContent}
               >
-                <CategoryCard 
-                  category={{ id: 'all', name: 'All', icon: 'grid-outline' }} 
-                  isSelected={selectedCategory === 'All'}
-                  onPress={() => setSelectedCategory('All')}
-                  variant="chip"
-                />
                 {categories.map(cat => (
                   <CategoryCard 
                     key={cat.id}
