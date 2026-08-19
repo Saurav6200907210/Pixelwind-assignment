@@ -11,7 +11,7 @@ export const promoSlides = [
   },
   {
     id: "sneakers",
-    image: "https://images.unsplash.com/photo-1552346154-21d32810baa3?q=80&w=1000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1000&auto=format&fit=crop",
     alt: "Premium sneaker collection"
   },
   {

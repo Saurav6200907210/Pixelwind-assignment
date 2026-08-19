@@ -79,7 +79,6 @@ export default function ProductCard({ product }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     marginHorizontal: 8,
     marginBottom: spacing.lg,
     borderRadius: 22,

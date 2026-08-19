@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Image, Animated } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Image, Animated, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,7 +13,7 @@ import CategoryCard from '../../components/CategoryCard';
 import ProductCard from '../../components/ProductCard';
 import SectionHeader from '../../components/SectionHeader';
 import EmptyState from '../../components/EmptyState';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
 
@@ -137,7 +137,7 @@ const HeroBanner = ({ theme }) => {
         <Text style={styles.heroSubtitle}>SUMMER COLLECTION</Text>
         <Text style={styles.heroTitle}>Upgrade your everyday style</Text>
         <Text style={styles.heroDiscount}>Up to 30% OFF</Text>
-        <TouchableOpacity style={[styles.heroBtn, { backgroundColor: theme.colors.primary }]}>
+        <TouchableOpacity style={[styles.heroBtn, { backgroundColor: theme.colors.primary }]} onPress={() => {}}>
           <Text style={styles.heroBtnText}>Shop Now</Text>
         </TouchableOpacity>
       </View>
@@ -159,50 +159,101 @@ const HeroBanner = ({ theme }) => {
 
 const OfferBanner = ({ theme }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
-  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [bannerWidth, setBannerWidth] = useState(0);
+  const [scrollX] = useState(() => new Animated.Value(0));
+  const flatListRef = useRef(null);
+  const timerRef = useRef(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }).start(() => {
-        setCurrentIndex((prev) => (prev + 1) % promoSlides.length);
-        setNextIndex((prev) => (prev + 1) % promoSlides.length);
-        fadeAnim.setValue(0);
+  const stopAutoPlay = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const startAutoPlay = useCallback(() => {
+    stopAutoPlay();
+    timerRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % promoSlides.length;
+        if (flatListRef.current && bannerWidth > 0) {
+          flatListRef.current.scrollToOffset({
+            offset: nextIndex * bannerWidth,
+            animated: true,
+          });
+        }
+        return nextIndex;
       });
     }, 4500);
+  }, [bannerWidth, stopAutoPlay]);
 
-    return () => clearInterval(interval);
-  }, [fadeAnim]);
+  useEffect(() => {
+    if (bannerWidth > 0) {
+      startAutoPlay();
+    }
+    return stopAutoPlay;
+  }, [bannerWidth, startAutoPlay, stopAutoPlay]);
+
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+    { useNativeDriver: true }
+  );
+
+  const handleMomentumScrollEnd = (event) => {
+    if (bannerWidth > 0) {
+      const newIndex = Math.round(event.nativeEvent.contentOffset.x / bannerWidth);
+      setCurrentIndex(newIndex);
+    }
+    startAutoPlay();
+  };
+
+  const renderItem = ({ item }) => {
+    return (
+      <View style={{ width: bannerWidth, height: '100%', overflow: 'hidden' }}>
+        <Image 
+          source={{ uri: item.image }} 
+          style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
+          resizeMode="cover"
+        />
+      </View>
+    );
+  };
 
   return (
-    <View style={styles.offerBanner}>
-      <Image 
-        source={{ uri: promoSlides[currentIndex].image }} 
-        style={styles.offerImage}
-        resizeMode="cover"
-      />
-      <Animated.Image 
-        source={{ uri: promoSlides[nextIndex].image }} 
-        style={[styles.offerImage, { opacity: fadeAnim }]}
-        resizeMode="cover"
-      />
+    <View 
+      style={[styles.offerBanner, { backgroundColor: theme.colors.surfaceSecondary }]}
+      onLayout={(e) => setBannerWidth(e.nativeEvent.layout.width)}
+    >
+      {bannerWidth > 0 && (
+        <Animated.FlatList
+          ref={flatListRef}
+          data={promoSlides}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          onScrollBeginDrag={stopAutoPlay}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          scrollEventThrottle={16}
+          bounces={false}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       
-      <View style={styles.offerOverlay} />
+      <View style={styles.offerOverlay} pointerEvents="none" />
 
-      <View style={styles.offerContent}>
+      <View style={styles.offerContent} pointerEvents="box-none">
         <Text style={styles.offerSubtitle}>WEEKEND SPECIAL</Text>
         <Text style={styles.offerTitle}>Extra 15% OFF</Text>
         <Text style={styles.offerDesc}>on selected products</Text>
-        <TouchableOpacity style={styles.offerBtn}>
+        <TouchableOpacity style={styles.offerBtn} onPress={() => {}}>
           <Text style={styles.offerBtnText}>Explore Deals</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.offerIndicators}>
+      <View style={styles.offerIndicators} pointerEvents="none">
         {promoSlides.map((_, idx) => (
           <View 
             key={idx} 
@@ -245,8 +296,16 @@ const TrustSection = ({ theme }) => {
 export default function HomeScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    if (params?.category) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedCategory(params.category);
+    }
+  }, [params?.category]);
 
   const filteredProducts = searchProducts(searchQuery).filter(product => 
     selectedCategory === 'All' ? true : product.category === selectedCategory
@@ -254,64 +313,67 @@ export default function HomeScreen() {
 
   const trendingProducts = products.filter(p => p.rating >= 4.8).slice(0, 5);
 
-  const renderProductGrid = (productsList) => {
-    const rows = [];
-    for (let i = 0; i < productsList.length; i += 2) {
-      rows.push(
-        <View key={i} style={styles.productRow}>
-          <View style={styles.productCell}>
-            <ProductCard product={productsList[i]} />
+  const renderHeader = () => (
+    <View>
+      <View style={styles.headerContainer}>
+        <View style={styles.topRow}>
+          <View>
+            <Text style={[styles.greeting, { color: theme.colors.textSecondary }]}>
+              Good morning, Saurav 👋
+            </Text>
+            <Text style={[styles.mainHeading, { color: theme.colors.textPrimary }]}>
+              Discover products you&apos;ll love
+            </Text>
           </View>
-          <View style={styles.productCell}>
-            {productsList[i + 1] && <ProductCard product={productsList[i + 1]} />}
+          <View style={[styles.avatar, { backgroundColor: theme.colors.surfaceSecondary }]}>
+            <Image 
+              source={{ uri: 'https://i.pravatar.cc/100' }} 
+              style={styles.avatarImage} 
+            />
           </View>
         </View>
-      );
-    }
-    return rows;
-  };
+        
+        <SearchBar 
+          value={searchQuery} 
+          onChangeText={setSearchQuery} 
+          onClear={() => setSearchQuery('')} 
+        />
+      </View>
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.scrollContent}
-      >
-        <View style={styles.headerContainer}>
-          <View style={styles.topRow}>
-            <View>
-              <Text style={[styles.greeting, { color: theme.colors.textSecondary }]}>
-                Good morning, Saurav 👋
-              </Text>
-              <Text style={[styles.mainHeading, { color: theme.colors.textPrimary }]}>
-                Discover products you&apos;ll love
-              </Text>
-            </View>
-            <View style={[styles.avatar, { backgroundColor: theme.colors.surfaceSecondary }]}>
-              <Image 
-                source={{ uri: 'https://i.pravatar.cc/100' }} 
-                style={styles.avatarImage} 
-              />
-            </View>
+      {!searchQuery ? (
+        <View>
+          <View style={styles.sectionPadding}>
+            <HeroBanner theme={theme} />
           </View>
-          
-          <SearchBar 
-            value={searchQuery} 
-            onChangeText={setSearchQuery} 
-            onClear={() => setSearchQuery('')} 
-          />
-        </View>
 
-        {!searchQuery ? (
-          <>
-            <View style={styles.sectionPadding}>
-              <HeroBanner theme={theme} />
-            </View>
+          <View style={styles.sectionPadding}>
+            <SectionHeader 
+              title="Shop by Category" 
+              actionTitle="See All" 
+              onActionPress={() => router.push('/categories')}
+            />
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.horizontalScroll}
+              contentContainerStyle={styles.horizontalScrollContent}
+            >
+              {categories.map(cat => (
+                <CategoryCard 
+                  key={cat.id}
+                  category={cat} 
+                  isSelected={selectedCategory === cat.name}
+                  onPress={() => setSelectedCategory(cat.name)}
+                  variant="chip"
+                />
+              ))}
+            </ScrollView>
+          </View>
 
+          {selectedCategory === 'All' && (
             <View style={styles.sectionPadding}>
               <SectionHeader 
-                title="Shop by Category" 
+                title="Trending Now" 
                 actionTitle="See All" 
                 onActionPress={() => router.push('/categories')}
               />
@@ -320,78 +382,78 @@ export default function HomeScreen() {
                 showsHorizontalScrollIndicator={false}
                 style={styles.horizontalScroll}
                 contentContainerStyle={styles.horizontalScrollContent}
+                snapToInterval={260 + spacing.md} // Card width + margin
+                decelerationRate="fast"
               >
-                {categories.map(cat => (
-                  <CategoryCard 
-                    key={cat.id}
-                    category={cat} 
-                    isSelected={selectedCategory === cat.name}
-                    onPress={() => setSelectedCategory(cat.name)}
-                    variant="chip"
-                  />
+                {trendingProducts.map(prod => (
+                  <View key={prod.id} style={{ width: 260 }}>
+                    <ProductCard product={prod} />
+                  </View>
                 ))}
               </ScrollView>
             </View>
+          )}
 
-            {selectedCategory === 'All' && (
-              <View style={styles.sectionPadding}>
-                <SectionHeader 
-                  title="Trending Now" 
-                  actionTitle="See All" 
-                  onActionPress={() => router.push('/categories')}
-                />
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.horizontalScroll}
-                  contentContainerStyle={styles.horizontalScrollContent}
-                  snapToInterval={260 + spacing.md} // Card width + margin
-                  decelerationRate="fast"
-                >
-                  {trendingProducts.map(prod => (
-                    <View key={prod.id} style={{ width: 260 }}>
-                      <ProductCard product={prod} />
-                    </View>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-
-            {selectedCategory === 'All' && (
-              <View style={styles.sectionPadding}>
-                <OfferBanner theme={theme} />
-              </View>
-            )}
-          </>
-        ) : null}
-
-        <View style={styles.sectionPadding}>
-          <SectionHeader 
-            title={searchQuery ? 'Search Results' : 'Popular Products'} 
-            actionTitle={searchQuery ? '' : 'See All'} 
-          />
-          {filteredProducts.length > 0 ? (
-            <View style={styles.gridContainer}>
-              {renderProductGrid(filteredProducts)}
+          {selectedCategory === 'All' && (
+            <View style={styles.sectionPadding}>
+              <OfferBanner theme={theme} />
             </View>
-          ) : (
-            <EmptyState 
-              icon="search-outline" 
-              title="No products found" 
-              description="Try searching for another keyword." 
-              buttonText="Clear Search"
-              onButtonPress={() => setSearchQuery('')}
-            />
           )}
         </View>
+      ) : null}
 
-        {!searchQuery && (
-          <View style={styles.sectionPadding}>
-            <TrustSection theme={theme} />
+      <View style={styles.sectionPadding}>
+        <SectionHeader 
+          title={searchQuery ? 'Search Results' : 'Popular Products'} 
+          actionTitle={searchQuery ? '' : 'See All'} 
+          onActionPress={() => !searchQuery && router.push('/categories')}
+        />
+      </View>
+    </View>
+  );
+
+  const renderFooter = () => (
+    <View>
+      {!searchQuery && (
+        <View style={styles.sectionPadding}>
+          <TrustSection theme={theme} />
+        </View>
+      )}
+    </View>
+  );
+
+  const renderEmpty = () => (
+    <View style={styles.sectionPadding}>
+      <EmptyState 
+        icon="search-outline" 
+        title="No products found" 
+        description="Try searching for another keyword." 
+        buttonText="Clear Search"
+        onButtonPress={() => setSearchQuery('')}
+      />
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+      <FlatList
+        style={{ flex: 1 }}
+        data={filteredProducts}
+        keyExtractor={item => item.id}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+        columnWrapperStyle={styles.productRow}
+        ListHeaderComponent={renderHeader()}
+        ListFooterComponent={renderFooter()}
+        ListEmptyComponent={renderEmpty()}
+        renderItem={({ item }) => (
+          <View style={styles.productCell}>
+            <ProductCard product={item} />
           </View>
         )}
-        
-      </ScrollView>
+      />
     </SafeAreaView>
   );
 }
@@ -488,24 +550,24 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 24,
     fontWeight: '900',
-    marginBottom: 8,
-    maxWidth: '70%',
+    marginBottom: 4,
   },
   heroDiscount: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#FFD700',
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 16,
   },
   heroBtn: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 16,
     alignSelf: 'flex-start',
   },
   heroBtnText: {
     color: '#FFF',
     fontWeight: 'bold',
+    fontSize: 14,
   },
   heroIndicators: {
     position: 'absolute',
@@ -534,7 +596,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     overflow: 'hidden',
     position: 'relative',
-    minHeight: 180,
+    height: 180,
     justifyContent: 'center',
   },
   offerImage: {
