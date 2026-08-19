@@ -307,9 +307,13 @@ export default function HomeScreen() {
     }
   }, [params?.category]);
 
-  const filteredProducts = searchProducts(searchQuery).filter(product => 
+  let filteredProducts = searchProducts(searchQuery).filter(product => 
     selectedCategory === 'All' ? true : product.category === selectedCategory
   );
+
+  if (selectedCategory === 'All' && !searchQuery) {
+    filteredProducts = filteredProducts.slice(0, 12);
+  }
 
   const trendingProducts = products.filter(p => p.rating >= 4.8).slice(0, 5);
 
