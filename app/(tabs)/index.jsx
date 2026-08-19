@@ -297,13 +297,50 @@ const TrustSection = ({ theme }) => {
 
 const CustomerFeedback = ({ theme }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const flatListRef = useRef(null);
+  const timerRef = useRef(null);
+  
+  const ITEM_WIDTH = 280 + spacing.sm * 2; // Card width + margins
+
+  const stopAutoPlay = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const startAutoPlay = useCallback(() => {
+    stopAutoPlay();
+    timerRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % customerReviews.length;
+        if (flatListRef.current) {
+          flatListRef.current.scrollToOffset({
+            offset: nextIndex * ITEM_WIDTH,
+            animated: true,
+          });
+        }
+        return nextIndex;
+      });
+    }, 4000); // Autoplay every 4 seconds
+  }, [stopAutoPlay, ITEM_WIDTH]);
+
+  useEffect(() => {
+    startAutoPlay();
+    return stopAutoPlay;
+  }, [startAutoPlay, stopAutoPlay]);
 
   const handleScroll = (event) => {
-    const itemWidth = 280 + spacing.sm * 2; // Card width + margins
-    const newIndex = Math.round(event.nativeEvent.contentOffset.x / itemWidth);
+    const newIndex = Math.round(event.nativeEvent.contentOffset.x / ITEM_WIDTH);
     if (newIndex !== currentIndex) {
       setCurrentIndex(newIndex);
     }
+  };
+
+  const handleMomentumScrollEnd = (event) => {
+    const newIndex = Math.round(event.nativeEvent.contentOffset.x / ITEM_WIDTH);
+    setCurrentIndex(newIndex);
+    startAutoPlay();
   };
 
   return (
@@ -315,14 +352,17 @@ const CustomerFeedback = ({ theme }) => {
         />
       </View>
       <FlatList
+        ref={flatListRef}
         data={customerReviews}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.feedbackScrollContent}
-        snapToInterval={280 + spacing.sm * 2} // Card width + margin
+        snapToInterval={ITEM_WIDTH}
         decelerationRate="fast"
         onScroll={handleScroll}
+        onScrollBeginDrag={stopAutoPlay}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
         scrollEventThrottle={16}
         renderItem={({ item }) => <ReviewCard review={item} />}
       />
