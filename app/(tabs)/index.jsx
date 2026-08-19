@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Image, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,40 +18,121 @@ import { typography } from '../../constants/typography';
 
 const HeroBanner = ({ theme }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
-  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [bannerWidth, setBannerWidth] = useState(0);
+  const [scrollX] = useState(() => new Animated.Value(0));
+  const flatListRef = useRef(null);
+  const timerRef = useRef(null);
+  const [imageErrors, setImageErrors] = useState({});
+
+  const stopAutoPlay = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const startAutoPlay = useCallback(() => {
+    stopAutoPlay();
+    timerRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % heroSlides.length;
+        if (flatListRef.current && bannerWidth > 0) {
+          flatListRef.current.scrollToOffset({
+            offset: nextIndex * bannerWidth,
+            animated: true,
+          });
+        }
+        return nextIndex;
+      });
+    }, 4000);
+  }, [bannerWidth, stopAutoPlay]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }).start(() => {
-        setCurrentIndex((prev) => (prev + 1) % heroSlides.length);
-        setNextIndex((prev) => (prev + 1) % heroSlides.length);
-        fadeAnim.setValue(0);
-      });
-    }, 4500);
+    if (bannerWidth > 0) {
+      startAutoPlay();
+    }
+    return stopAutoPlay;
+  }, [bannerWidth, startAutoPlay, stopAutoPlay]);
 
-    return () => clearInterval(interval);
-  }, [fadeAnim]);
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+    { useNativeDriver: true }
+  );
+
+  const handleMomentumScrollEnd = (event) => {
+    if (bannerWidth > 0) {
+      const newIndex = Math.round(event.nativeEvent.contentOffset.x / bannerWidth);
+      setCurrentIndex(newIndex);
+    }
+    startAutoPlay();
+  };
+
+  const renderItem = ({ item, index }) => {
+    const inputRange = [
+      (index - 1) * bannerWidth,
+      index * bannerWidth,
+      (index + 1) * bannerWidth,
+    ];
+    
+    const scale = bannerWidth > 0 ? scrollX.interpolate({
+      inputRange,
+      outputRange: [0.95, 1, 0.95],
+      extrapolate: 'clamp',
+    }) : 1;
+    
+    const opacity = bannerWidth > 0 ? scrollX.interpolate({
+      inputRange,
+      outputRange: [0.6, 1, 0.6],
+      extrapolate: 'clamp',
+    }) : 1;
+
+    const hasError = imageErrors[item.id];
+
+    return (
+      <View style={{ width: bannerWidth, height: '100%', overflow: 'hidden' }}>
+        <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale }], opacity }]}>
+          {!hasError ? (
+            <Image 
+              source={{ uri: item.image }} 
+              style={styles.heroImage}
+              resizeMode="cover"
+              onError={() => setImageErrors(prev => ({ ...prev, [item.id]: true }))}
+            />
+          ) : (
+            <View style={[styles.heroImage, { backgroundColor: '#2A2A35', justifyContent: 'center', alignItems: 'center' }]}>
+               <Ionicons name="image-outline" size={32} color="#666" />
+            </View>
+          )}
+        </Animated.View>
+      </View>
+    );
+  };
 
   return (
-    <View style={[styles.heroBanner, { backgroundColor: theme.colors.surfaceSecondary }]}>
-      <Image 
-        source={{ uri: heroSlides[currentIndex].image }} 
-        style={styles.heroImage}
-        resizeMode="cover"
-      />
-      <Animated.Image 
-        source={{ uri: heroSlides[nextIndex].image }} 
-        style={[styles.heroImage, { opacity: fadeAnim }]}
-        resizeMode="cover"
-      />
+    <View 
+      style={[styles.heroBanner, { backgroundColor: theme.colors.surfaceSecondary }]}
+      onLayout={(e) => setBannerWidth(e.nativeEvent.layout.width)}
+    >
+      {bannerWidth > 0 && (
+        <Animated.FlatList
+          ref={flatListRef}
+          data={heroSlides}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          onScrollBeginDrag={stopAutoPlay}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          scrollEventThrottle={16}
+          bounces={false}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       
-      <View style={styles.heroOverlay} />
-      <View style={styles.heroContent}>
+      <View style={styles.heroOverlay} pointerEvents="none" />
+      <View style={styles.heroContent} pointerEvents="box-none">
         <Text style={styles.heroSubtitle}>SUMMER COLLECTION</Text>
         <Text style={styles.heroTitle}>Upgrade your everyday style</Text>
         <Text style={styles.heroDiscount}>Up to 30% OFF</Text>
@@ -60,7 +141,7 @@ const HeroBanner = ({ theme }) => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.heroIndicators}>
+      <View style={styles.heroIndicators} pointerEvents="none">
         {heroSlides.map((_, idx) => (
           <View 
             key={idx} 

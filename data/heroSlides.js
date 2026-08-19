@@ -1,27 +1,27 @@
 export const heroSlides = [
   {
+    id: "electronics",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
+    alt: "Premium Wireless Headphones"
+  },
+  {
     id: "fashion",
     image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop",
     alt: "Fashion shopping campaign"
   },
   {
-    id: "style",
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
-    alt: "Modern fashion editorial"
+    id: "watches",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop",
+    alt: "Luxury Smartwatch"
   },
   {
-    id: "sneakers",
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000&auto=format&fit=crop",
-    alt: "Premium sneaker campaign"
+    id: "shoes",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop",
+    alt: "Premium Running Shoes"
   },
   {
-    id: "beauty",
-    image: "https://images.unsplash.com/photo-1596462502278-27bf85033e5a?q=80&w=1000&auto=format&fit=crop",
-    alt: "Premium beauty campaign"
-  },
-  {
-    id: "shopping",
-    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1000&auto=format&fit=crop",
-    alt: "Luxury shopping lifestyle"
+    id: "gadgets",
+    image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=1000&auto=format&fit=crop",
+    alt: "Latest Tech Gadgets"
   }
 ];
