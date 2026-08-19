@@ -8,9 +8,11 @@ import { categories } from '../../data/categories';
 import { searchProducts } from '../../utils/productHelpers';
 import { heroSlides } from '../../data/heroSlides';
 import { promoSlides } from '../../data/promoSlides';
+import { customerReviews } from '../../data/reviews';
 import SearchBar from '../../components/SearchBar';
 import CategoryCard from '../../components/CategoryCard';
 import ProductCard from '../../components/ProductCard';
+import ReviewCard from '../../components/ReviewCard';
 import SectionHeader from '../../components/SectionHeader';
 import EmptyState from '../../components/EmptyState';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -293,6 +295,53 @@ const TrustSection = ({ theme }) => {
   );
 };
 
+const CustomerFeedback = ({ theme }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleScroll = (event) => {
+    const itemWidth = 280 + spacing.sm * 2; // Card width + margins
+    const newIndex = Math.round(event.nativeEvent.contentOffset.x / itemWidth);
+    if (newIndex !== currentIndex) {
+      setCurrentIndex(newIndex);
+    }
+  };
+
+  return (
+    <View style={styles.feedbackSection}>
+      <View style={styles.sectionPadding}>
+        <SectionHeader 
+          title="Customer Feedback" 
+          subtitle="See what our customers are saying"
+        />
+      </View>
+      <FlatList
+        data={customerReviews}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.feedbackScrollContent}
+        snapToInterval={280 + spacing.sm * 2} // Card width + margin
+        decelerationRate="fast"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        renderItem={({ item }) => <ReviewCard review={item} />}
+      />
+      <View style={styles.feedbackIndicators}>
+        {customerReviews.map((_, idx) => (
+          <View 
+            key={idx} 
+            style={[
+              styles.feedbackIndicatorDot,
+              idx === currentIndex && styles.feedbackIndicatorDotActive,
+              { backgroundColor: idx === currentIndex ? theme.colors.primary : 'rgba(150,150,150,0.3)' }
+            ]} 
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
 export default function HomeScreen() {
   const { theme } = useTheme();
   const router = useRouter();
@@ -419,8 +468,11 @@ export default function HomeScreen() {
   const renderFooter = () => (
     <View>
       {!searchQuery && (
-        <View style={styles.sectionPadding}>
-          <TrustSection theme={theme} />
+        <View>
+          <CustomerFeedback theme={theme} />
+          <View style={styles.sectionPadding}>
+            <TrustSection theme={theme} />
+          </View>
         </View>
       )}
     </View>
@@ -701,8 +753,32 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   trustText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
-  }
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  feedbackSection: {
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  feedbackScrollContent: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  feedbackIndicators: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: spacing.md,
+  },
+  feedbackIndicatorDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 4,
+  },
+  feedbackIndicatorDotActive: {
+    width: 20,
+    height: 6,
+    borderRadius: 3,
+  },
 });
