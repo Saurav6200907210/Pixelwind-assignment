@@ -96,9 +96,12 @@ export default function ProductDetailsScreen() {
           
           <View style={styles.priceRow}>
             <Text style={[styles.price, { color: theme.colors.textPrimary }]}>{formatCurrency(product.price)}</Text>
-            {product.price > 5000 && (
+            {product.originalPrice && (
+              <Text style={[styles.originalPrice, { color: theme.colors.textSecondary }]}>{formatCurrency(product.originalPrice)}</Text>
+            )}
+            {product.discount && (
               <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>20% OFF</Text>
+                <Text style={styles.discountText}>{product.discount}</Text>
               </View>
             )}
           </View>
@@ -112,12 +115,42 @@ export default function ProductDetailsScreen() {
 
           <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>Features</Text>
           <View style={styles.featuresList}>
-            {['Premium Build Quality', '1 Year Warranty', 'Free Delivery Available', '10 Days Return Policy'].map((feature, idx) => (
+            {(product.features || []).map((feature, idx) => (
               <View key={idx} style={styles.featureItem}>
                 <Ionicons name="checkmark-circle" size={20} color={theme.colors.success} style={styles.featureIcon} />
                 <Text style={[styles.featureText, { color: theme.colors.textSecondary }]}>{feature}</Text>
               </View>
             ))}
+          </View>
+
+          <View style={styles.divider} />
+
+          <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>Information</Text>
+          <View style={styles.infoList}>
+            {product.brand && (
+              <View style={styles.infoItem}>
+                <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Brand:</Text>
+                <Text style={[styles.infoValue, { color: theme.colors.textPrimary }]}>{product.brand}</Text>
+              </View>
+            )}
+            {product.availability && (
+              <View style={styles.infoItem}>
+                <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Stock:</Text>
+                <Text style={[styles.infoValue, { color: theme.colors.textPrimary }]}>{product.availability}</Text>
+              </View>
+            )}
+            {product.delivery && (
+              <View style={styles.infoItem}>
+                <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Delivery:</Text>
+                <Text style={[styles.infoValue, { color: theme.colors.textPrimary }]}>{product.delivery}</Text>
+              </View>
+            )}
+            {product.returnPolicy && (
+              <View style={styles.infoItem}>
+                <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Returns:</Text>
+                <Text style={[styles.infoValue, { color: theme.colors.textPrimary }]}>{product.returnPolicy}</Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -275,6 +308,28 @@ const styles = StyleSheet.create({
   featureText: {
     fontSize: typography.sizes.md,
     fontWeight: '500',
+  },
+  originalPrice: {
+    fontSize: 18,
+    textDecorationLine: 'line-through',
+    marginRight: spacing.md,
+  },
+  infoList: {
+    marginTop: spacing.sm,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+  },
+  infoLabel: {
+    width: 80,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.medium,
+  },
+  infoValue: {
+    flex: 1,
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.bold,
   },
   bottomBar: {
     position: 'absolute',
