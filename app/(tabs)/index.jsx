@@ -13,6 +13,7 @@ import CategoryCard from '../../components/CategoryCard';
 import ProductCard from '../../components/ProductCard';
 import SectionHeader from '../../components/SectionHeader';
 import EmptyState from '../../components/EmptyState';
+import { useRouter } from 'expo-router';
 import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
 
@@ -243,6 +244,7 @@ const TrustSection = ({ theme }) => {
 
 export default function HomeScreen() {
   const { theme } = useTheme();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -308,7 +310,11 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.sectionPadding}>
-              <SectionHeader title="Shop by Category" actionTitle="See All" />
+              <SectionHeader 
+                title="Shop by Category" 
+                actionTitle="See All" 
+                onActionPress={() => router.push('/categories')}
+              />
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
@@ -329,7 +335,11 @@ export default function HomeScreen() {
 
             {selectedCategory === 'All' && (
               <View style={styles.sectionPadding}>
-                <SectionHeader title="Trending Now" actionTitle="See All" />
+                <SectionHeader 
+                  title="Trending Now" 
+                  actionTitle="See All" 
+                  onActionPress={() => router.push('/categories')}
+                />
                 <ScrollView 
                   horizontal 
                   showsHorizontalScrollIndicator={false}
