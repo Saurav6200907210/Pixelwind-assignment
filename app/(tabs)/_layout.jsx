@@ -40,14 +40,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              paddingHorizontal: 16,
-              paddingVertical: 6,
-              borderRadius: 20,
-              backgroundColor: focused ? `${theme.colors.primary}15` : 'transparent',
-            }}>
-              <Ionicons name={focused ? "home" : "home-outline"} size={26} color={color} />
-            </View>
+            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
           ),
         }}
       />
@@ -56,14 +49,16 @@ export default function TabLayout() {
         options={{
           title: 'Categories',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              paddingHorizontal: 16,
-              paddingVertical: 6,
-              borderRadius: 20,
-              backgroundColor: focused ? `${theme.colors.primary}15` : 'transparent',
-            }}>
-              <Ionicons name={focused ? "grid" : "grid-outline"} size={26} color={color} />
-            </View>
+            <Ionicons name={focused ? "grid" : "grid-outline"} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="wishlist"
+        options={{
+          title: 'Wishlist',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "heart" : "heart-outline"} size={24} color={color} />
           ),
         }}
       />
@@ -72,29 +67,24 @@ export default function TabLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              paddingHorizontal: 16,
-              paddingVertical: 6,
-              borderRadius: 20,
-              backgroundColor: focused ? `${theme.colors.primary}15` : 'transparent',
-            }}>
-              <Ionicons name={focused ? "cart" : "cart-outline"} size={26} color={color} />
+            <View>
+              <Ionicons name={focused ? "cart" : "cart-outline"} size={24} color={color} />
               {cartItemCount > 0 && (
                 <View style={{
                   position: 'absolute',
-                  right: 6,
-                  top: 2,
+                  right: -6,
+                  top: -4,
                   backgroundColor: theme.colors.danger,
-                  borderRadius: 12,
-                  minWidth: 20,
-                  height: 20,
+                  borderRadius: 10,
+                  minWidth: 16,
+                  height: 16,
                   justifyContent: 'center',
                   alignItems: 'center',
-                  paddingHorizontal: 4,
-                  borderWidth: 2,
+                  paddingHorizontal: 3,
+                  borderWidth: 1.5,
                   borderColor: theme.colors.surface,
                 }}>
-                  <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>
+                  <Text style={{ color: 'white', fontSize: 9, fontWeight: 'bold' }}>
                     {cartItemCount > 9 ? '9+' : cartItemCount}
                   </Text>
                 </View>
@@ -108,14 +98,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              paddingHorizontal: 16,
-              paddingVertical: 6,
-              borderRadius: 20,
-              backgroundColor: focused ? `${theme.colors.primary}15` : 'transparent',
-            }}>
-              <Ionicons name={focused ? "person" : "person-outline"} size={26} color={color} />
-            </View>
+            <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />
           ),
         }}
       />
