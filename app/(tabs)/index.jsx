@@ -546,7 +546,7 @@ export default function HomeScreen() {
               <SectionHeader 
                 title="Trending Now" 
                 actionTitle="See All" 
-                onActionPress={() => router.push('/categories')}
+                onActionPress={() => router.push('/trending')}
               />
               <ScrollView 
                 horizontal 
@@ -577,7 +577,7 @@ export default function HomeScreen() {
         <SectionHeader 
           title={(searchQuery || hasAdvancedFilters) ? (searchQuery ? 'Search Results' : 'Filtered Products') : 'Popular Products'} 
           actionTitle={(searchQuery || hasAdvancedFilters) ? '' : 'See All'} 
-          onActionPress={() => !(searchQuery || hasAdvancedFilters) && router.push('/categories')}
+          onActionPress={() => !(searchQuery || hasAdvancedFilters) && router.push('/popular')}
         />
       </View>
     </View>
