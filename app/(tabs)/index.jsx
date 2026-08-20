@@ -16,7 +16,7 @@ import ReviewCard from '../../components/ReviewCard';
 import SectionHeader from '../../components/SectionHeader';
 import EmptyState from '../../components/EmptyState';
 import FilterModal from '../../components/FilterModal';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
 
@@ -393,6 +393,8 @@ export default function HomeScreen() {
   const [priceRange, setPriceRange] = useState('All');
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState('Relevance');
+  const flatListRef = useRef(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (params?.category) {
@@ -400,6 +402,24 @@ export default function HomeScreen() {
       setSelectedCategory(params.category);
     }
   }, [params?.category]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      // Reset all temporary filters and search state
+      setSearchQuery('');
+      setSelectedCategory('All');
+      setPriceRange('All');
+      setMinRating(0);
+      setSortBy('Relevance');
+      
+      // Scroll to the top if we are already on this screen
+      if (flatListRef.current) {
+        flatListRef.current.scrollToOffset({ offset: 0, animated: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const handleApplyFilters = (filters) => {
     setSelectedCategory(filters.category);
@@ -580,6 +600,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <FlatList
+        ref={flatListRef}
         style={{ flex: 1 }}
         data={filteredProducts}
         keyExtractor={item => item.id}
