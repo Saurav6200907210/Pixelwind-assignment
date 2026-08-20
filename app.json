@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "ecommerce-app",
     "slug": "ecommerce-app",
@@ -39,6 +39,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cbb77338-9acf-45e3-b3f8-007d3d8d3dc5"
+      }
+    },
+    "owner": "saurav9534"
   }
 }
