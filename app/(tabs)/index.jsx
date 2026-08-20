@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Image, Animated, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { products } from '../../data/products';
 import { categories } from '../../data/categories';
@@ -273,22 +273,39 @@ const OfferBanner = ({ theme }) => {
 
 const TrustSection = ({ theme }) => {
   const items = [
-    { icon: 'star', text: 'Premium Products' },
-    { icon: 'airplane', text: 'Fast Delivery' },
-    { icon: 'shield-checkmark', text: 'Secure Shopping' },
-    { icon: 'refresh-circle', text: 'Easy Returns' },
+    { 
+      icon: 'award', 
+      title: 'Premium Products', 
+      desc: 'Quality products carefully selected for you.' 
+    },
+    { 
+      icon: 'truck', 
+      title: 'Fast Delivery', 
+      desc: 'Quick and reliable delivery to your doorstep.' 
+    },
+    { 
+      icon: 'shield', 
+      title: 'Secure Shopping', 
+      desc: 'Safe and secure shopping experience.' 
+    },
+    { 
+      icon: 'refresh-ccw', 
+      title: 'Easy Returns', 
+      desc: 'Simple returns with hassle-free support.' 
+    },
   ];
 
   return (
-    <View style={[styles.trustSection, { backgroundColor: theme.colors.surface }]}>
-      <Text style={[styles.trustTitle, { color: theme.colors.textPrimary }]}>Why Shop With Us</Text>
+    <View style={styles.trustSection}>
+      <SectionHeader title="Why Shop With Us" />
       <View style={styles.trustGrid}>
         {items.map((item, idx) => (
-          <View key={idx} style={styles.trustItem}>
+          <View key={idx} style={[styles.trustItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={[styles.trustIconWrap, { backgroundColor: `${theme.colors.primary}15` }]}>
-              <Ionicons name={item.icon} size={20} color={theme.colors.primary} />
+              <Feather name={item.icon} size={20} color={theme.colors.primary} />
             </View>
-            <Text style={[styles.trustText, { color: theme.colors.textSecondary }]}>{item.text}</Text>
+            <Text style={[styles.trustItemTitle, { color: theme.colors.textPrimary }]}>{item.title}</Text>
+            <Text style={[styles.trustItemDesc, { color: theme.colors.textSecondary }]}>{item.desc}</Text>
           </View>
         ))}
       </View>
@@ -837,42 +854,43 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   trustSection: {
-    borderRadius: 24,
-    padding: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  trustTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.xl,
   },
   trustGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   trustItem: {
     width: '48%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
+    borderRadius: 20,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   trustIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginBottom: spacing.sm,
   },
-  trustText: {
-    fontSize: 12,
-    fontWeight: '600',
+  trustItemTitle: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.bold,
+    marginBottom: 4,
+  },
+  trustItemDesc: {
+    fontSize: 11,
+    lineHeight: 16,
   },
   feedbackSection: {
     marginTop: spacing.md,

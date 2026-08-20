@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { getProductById } from '../../utils/productHelpers';
 import { formatCurrency } from '../../utils/currency';
 import Rating from '../../components/Rating';
@@ -19,11 +20,12 @@ export default function ProductDetailsScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [quantity, setQuantity] = useState(1);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [added, setAdded] = useState(false);
   
   const product = getProductById(id);
+  const isFavorite = product ? isInWishlist(product.id) : false;
 
   useEffect(() => {
     let timeout;
@@ -65,7 +67,7 @@ export default function ProductDetailsScreen() {
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.iconBtn, { backgroundColor: theme.colors.surfaceSecondary }]} 
-          onPress={() => setIsFavorite(!isFavorite)}
+          onPress={() => toggleWishlist(product)}
         >
           <Ionicons 
             name={isFavorite ? "heart" : "heart-outline"} 

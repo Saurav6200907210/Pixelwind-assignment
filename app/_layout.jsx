@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack } from 'expo-router';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { CartProvider } from '../context/CartContext';
+import { WishlistProvider } from '../context/WishlistContext';
 import { StatusBar } from 'expo-status-bar';
 import { View, Platform, StyleSheet } from 'react-native';
 
@@ -9,7 +10,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <CartProvider>
-        <AppWrapper />
+        <WishlistProvider>
+          <AppWrapper />
+        </WishlistProvider>
       </CartProvider>
     </ThemeProvider>
   );

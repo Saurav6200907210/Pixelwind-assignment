@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Pressable } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { formatCurrency } from '../utils/currency';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { spacing } from '../constants/spacing';
 import { typography } from '../constants/typography';
 import { useRouter } from 'expo-router';
@@ -11,8 +12,10 @@ import { useRouter } from 'expo-router';
 export default function ProductCard({ product }) {
   const { theme } = useTheme();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const router = useRouter();
-  const [isFavorite, setIsFavorite] = useState(false);
+  
+  const isFavorite = isInWishlist(product.id);
 
   const handleAddToCart = () => {
     addToCart(product);
@@ -38,7 +41,7 @@ export default function ProductCard({ product }) {
           onPress={(e) => {
             if (e && e.stopPropagation) e.stopPropagation();
             if (e && e.preventDefault) e.preventDefault();
-            setIsFavorite(!isFavorite);
+            toggleWishlist(product);
           }}
         >
           <Ionicons 
