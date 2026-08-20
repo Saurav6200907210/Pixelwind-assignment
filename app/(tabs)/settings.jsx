@@ -28,44 +28,49 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.background, zIndex: 10 }]}>
         <Text style={[styles.title, { color: theme.colors.textPrimary }]}>Settings</Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>Customize your shopping experience.</Text>
       </View>
 
-      <View style={styles.section}>
-        <SectionHeader title="Appearance" />
-        <ThemeSelector />
-      </View>
-
-      <View style={styles.section}>
-        <SectionHeader title="App Preferences" />
-        <View style={[styles.infoCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-          <TouchableOpacity style={styles.infoRow} activeOpacity={0.7} onPress={() => setNotificationsOpen(true)}>
-            <View style={styles.infoRowLeft}>
-              <View style={[styles.settingIconBox, { backgroundColor: `${theme.colors.primary}15` }]}>
-                <Ionicons name="notifications" size={20} color={theme.colors.primary} />
-              </View>
-              <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]} numberOfLines={1}>Notifications</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-          </TouchableOpacity>
-          <View style={styles.divider} />
-          <TouchableOpacity style={styles.infoRow} activeOpacity={0.7} onPress={() => setLanguageOpen(true)}>
-            <View style={styles.infoRowLeft}>
-              <View style={[styles.settingIconBox, { backgroundColor: `${theme.colors.primary}15` }]}>
-                <Ionicons name="globe" size={20} color={theme.colors.primary} />
-              </View>
-              <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]} numberOfLines={1}>Language & Region</Text>
-            </View>
-            <View style={styles.infoRowRight}>
-              <Text style={[styles.infoValue, { color: theme.colors.textSecondary, marginRight: 8 }]} numberOfLines={1}>English (US)</Text>
-              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-            </View>
-          </TouchableOpacity>
+      <ScrollView 
+        style={{ flex: 1 }} 
+        contentContainerStyle={{ paddingBottom: spacing.xl }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.section}>
+          <SectionHeader title="Appearance" />
+          <ThemeSelector />
         </View>
-      </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="App Preferences" />
+          <View style={[styles.infoCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <TouchableOpacity style={styles.infoRow} activeOpacity={0.7} onPress={() => setNotificationsOpen(true)}>
+              <View style={styles.infoRowLeft}>
+                <View style={[styles.settingIconBox, { backgroundColor: `${theme.colors.primary}15` }]}>
+                  <Ionicons name="notifications" size={20} color={theme.colors.primary} />
+                </View>
+                <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]} numberOfLines={1}>Notifications</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.divider} />
+            <TouchableOpacity style={styles.infoRow} activeOpacity={0.7} onPress={() => setLanguageOpen(true)}>
+              <View style={styles.infoRowLeft}>
+                <View style={[styles.settingIconBox, { backgroundColor: `${theme.colors.primary}15` }]}>
+                  <Ionicons name="globe" size={20} color={theme.colors.primary} />
+                </View>
+                <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]} numberOfLines={1}>Language & Region</Text>
+              </View>
+              <View style={styles.infoRowRight}>
+                <Text style={[styles.infoValue, { color: theme.colors.textSecondary, marginRight: 8, flexShrink: 1 }]} numberOfLines={1}>English (US)</Text>
+                <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
 
       <Modal visible={notificationsOpen} transparent animationType="fade" onRequestClose={() => setNotificationsOpen(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setNotificationsOpen(false)}>
@@ -106,7 +111,8 @@ export default function SettingsScreen() {
         </Pressable>
       </Modal>
 
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 

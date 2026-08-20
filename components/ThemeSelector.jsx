@@ -23,7 +23,7 @@ export default function ThemeSelector() {
             key={option.value}
             style={[
               styles.option,
-              { backgroundColor: isSelected ? `${theme.colors.primary}08` : theme.colors.surface, borderColor: isSelected ? theme.colors.primary : theme.colors.border }
+              { backgroundColor: theme.colors.surface, borderColor: isSelected ? theme.colors.primary : theme.colors.border }
             ]}
             onPress={() => setThemeMode(option.value)}
             activeOpacity={0.7}
