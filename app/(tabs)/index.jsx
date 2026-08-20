@@ -486,18 +486,22 @@ export default function HomeScreen() {
     <View>
       <View style={styles.headerContainer}>
         <View style={styles.topRow}>
-          <View>
-            <Text style={[styles.greeting, { color: theme.colors.textSecondary }]}>
-              Good morning, Saurav 👋
+          <View style={styles.headerTextContainer}>
+            <Text style={[styles.brandLabel, { color: theme.colors.textSecondary }]}>
+              VELORA
             </Text>
             <Text style={[styles.mainHeading, { color: theme.colors.textPrimary }]}>
-              Discover products you&apos;ll love
+              Elevate Your Everyday
+            </Text>
+            <Text style={[styles.subheading, { color: theme.colors.textSecondary }]}>
+              Curated products. Exceptional choices.
             </Text>
           </View>
           <View style={[styles.avatar, { backgroundColor: theme.colors.surfaceSecondary }]}>
             <Image 
-              source={{ uri: 'https://i.pravatar.cc/100' }} 
-              style={styles.avatarImage} 
+              source={require('../../assets/images/premium_bag.jpg')}
+              style={styles.avatarImage}
+              resizeMode="cover"
             />
           </View>
         </View>
@@ -671,16 +675,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.xs,
   },
-  greeting: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.medium,
-    marginBottom: 6,
+  headerTextContainer: {
+    flex: 1,
+    paddingRight: spacing.sm,
+  },
+  brandLabel: {
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
   mainHeading: {
-    fontSize: typography.sizes.xxxl,
+    fontSize: typography.sizes.xxl,
     fontWeight: typography.weights.heavy,
-    maxWidth: '85%',
-    lineHeight: 34,
+    lineHeight: 32,
+    marginBottom: 4,
+  },
+  subheading: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.regular,
   },
   avatar: {
     width: 56,
