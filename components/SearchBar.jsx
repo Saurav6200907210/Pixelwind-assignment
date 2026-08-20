@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../constants/spacing';
 import { typography } from '../constants/typography';
 
-export default function SearchBar({ value, onChangeText, onClear }) {
+export default function SearchBar({ value, onChangeText, onClear, onFilterPress, filtersActive }) {
   const { theme } = useTheme();
 
   return (
@@ -24,8 +24,15 @@ export default function SearchBar({ value, onChangeText, onClear }) {
           <Ionicons name="close-circle" size={18} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       )}
-      <TouchableOpacity style={styles.filterBtn}>
+      <TouchableOpacity 
+        style={styles.filterBtn} 
+        onPress={onFilterPress}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
         <Ionicons name="options-outline" size={20} color={theme.colors.textPrimary} />
+        {filtersActive && (
+          <View style={[styles.badge, { backgroundColor: theme.colors.primary }]} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -61,5 +68,18 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.sm,
     borderLeftWidth: 1,
     borderLeftColor: 'rgba(150,150,150,0.2)',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: 2,
+    right: -2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#FFF', // Ideally theme surface secondary but white is fine for contrast
   }
 });

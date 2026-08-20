@@ -15,6 +15,7 @@ import ProductCard from '../../components/ProductCard';
 import ReviewCard from '../../components/ReviewCard';
 import SectionHeader from '../../components/SectionHeader';
 import EmptyState from '../../components/EmptyState';
+import FilterModal from '../../components/FilterModal';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
@@ -388,6 +389,10 @@ export default function HomeScreen() {
   const params = useLocalSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [priceRange, setPriceRange] = useState('All');
+  const [minRating, setMinRating] = useState(0);
+  const [sortBy, setSortBy] = useState('Relevance');
 
   useEffect(() => {
     if (params?.category) {
@@ -396,11 +401,45 @@ export default function HomeScreen() {
     }
   }, [params?.category]);
 
+  const handleApplyFilters = (filters) => {
+    setSelectedCategory(filters.category);
+    setPriceRange(filters.priceRange);
+    setMinRating(filters.rating);
+    setSortBy(filters.sortBy);
+  };
+
+  const hasActiveFilters = selectedCategory !== 'All' || priceRange !== 'All' || minRating > 0 || sortBy !== 'Relevance';
+  const hasAdvancedFilters = priceRange !== 'All' || minRating > 0 || sortBy !== 'Relevance';
+
   let filteredProducts = searchProducts(searchQuery).filter(product => 
     selectedCategory === 'All' ? true : product.category === selectedCategory
   );
 
-  if (selectedCategory === 'All' && !searchQuery) {
+  if (priceRange !== 'All') {
+    filteredProducts = filteredProducts.filter(product => {
+      if (priceRange === 'under_1000') return product.price < 1000;
+      if (priceRange === '1000_5000') return product.price >= 1000 && product.price <= 5000;
+      if (priceRange === '5000_10000') return product.price > 5000 && product.price <= 10000;
+      if (priceRange === 'above_10000') return product.price > 10000;
+      return true;
+    });
+  }
+
+  if (minRating > 0) {
+    filteredProducts = filteredProducts.filter(product => product.rating >= minRating);
+  }
+
+  if (sortBy === 'Price: Low to High') {
+    filteredProducts.sort((a, b) => a.price - b.price);
+  } else if (sortBy === 'Price: High to Low') {
+    filteredProducts.sort((a, b) => b.price - a.price);
+  } else if (sortBy === 'Rating') {
+    filteredProducts.sort((a, b) => b.rating - a.rating);
+  } else if (sortBy === 'Newest') {
+    filteredProducts.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+  }
+
+  if (!hasActiveFilters && !searchQuery) {
     filteredProducts = filteredProducts.slice(0, 12);
   }
 
@@ -430,10 +469,12 @@ export default function HomeScreen() {
           value={searchQuery} 
           onChangeText={setSearchQuery} 
           onClear={() => setSearchQuery('')} 
+          onFilterPress={() => setIsFilterModalVisible(true)}
+          filtersActive={hasActiveFilters}
         />
       </View>
 
-      {!searchQuery ? (
+      {(!searchQuery && !hasAdvancedFilters) ? (
         <View>
           <View style={styles.sectionPadding}>
             <HeroBanner theme={theme} />
@@ -497,9 +538,9 @@ export default function HomeScreen() {
 
       <View style={styles.sectionPadding}>
         <SectionHeader 
-          title={searchQuery ? 'Search Results' : 'Popular Products'} 
-          actionTitle={searchQuery ? '' : 'See All'} 
-          onActionPress={() => !searchQuery && router.push('/categories')}
+          title={(searchQuery || hasAdvancedFilters) ? (searchQuery ? 'Search Results' : 'Filtered Products') : 'Popular Products'} 
+          actionTitle={(searchQuery || hasAdvancedFilters) ? '' : 'See All'} 
+          onActionPress={() => !(searchQuery || hasAdvancedFilters) && router.push('/categories')}
         />
       </View>
     </View>
@@ -507,7 +548,7 @@ export default function HomeScreen() {
 
   const renderFooter = () => (
     <View>
-      {!searchQuery && (
+      {(!searchQuery && !hasAdvancedFilters) && (
         <View>
           <CustomerFeedback theme={theme} />
           <View style={styles.sectionPadding}>
@@ -523,9 +564,15 @@ export default function HomeScreen() {
       <EmptyState 
         icon="search-outline" 
         title="No products found" 
-        description="Try searching for another keyword." 
-        buttonText="Clear Search"
-        onButtonPress={() => setSearchQuery('')}
+        description={hasActiveFilters ? "Try adjusting your filters or search query." : "Try searching for another keyword."} 
+        buttonText={hasActiveFilters ? "Clear Filters" : "Clear Search"}
+        onButtonPress={() => {
+          if (hasActiveFilters) {
+            handleApplyFilters({ category: 'All', priceRange: 'All', rating: 0, sortBy: 'Relevance' });
+          } else {
+            setSearchQuery('');
+          }
+        }}
       />
     </View>
   );
@@ -549,6 +596,16 @@ export default function HomeScreen() {
             <ProductCard product={item} />
           </View>
         )}
+      />
+      
+      <FilterModal 
+        visible={isFilterModalVisible}
+        onClose={() => setIsFilterModalVisible(false)}
+        onApply={handleApplyFilters}
+        initialCategory={selectedCategory}
+        initialPriceRange={priceRange}
+        initialRating={minRating}
+        initialSortBy={sortBy}
       />
     </SafeAreaView>
   );
