@@ -64,10 +64,7 @@ export default function SettingsScreen() {
                 </View>
                 <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]} numberOfLines={1}>Language & Region</Text>
               </View>
-              <View style={styles.infoRowRight}>
-                <Text style={[styles.infoValue, { color: theme.colors.textSecondary, marginRight: 8, flexShrink: 1 }]} numberOfLines={1}>English (US)</Text>
-                <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -161,11 +158,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: spacing.sm,
   },
-  infoRowRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 1,
-  },
+
   settingIconBox: {
     width: 36,
     height: 36,
@@ -184,10 +177,7 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.semiBold,
   },
-  infoValue: {
-    fontSize: typography.sizes.md,
-    fontWeight: typography.weights.medium,
-  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
