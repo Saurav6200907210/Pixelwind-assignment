@@ -14,15 +14,6 @@ export default function WishlistScreen() {
   const { wishlist } = useWishlist();
   const router = useRouter();
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={[styles.title, { color: theme.colors.textPrimary }]}>Wishlist</Text>
-      <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-        {wishlist.length} {wishlist.length === 1 ? 'Item' : 'Items'}
-      </Text>
-    </View>
-  );
-
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <EmptyState 
@@ -37,6 +28,12 @@ export default function WishlistScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+      <View style={[styles.header, { backgroundColor: theme.colors.background, zIndex: 10 }]}>
+        <Text style={[styles.title, { color: theme.colors.textPrimary }]}>Wishlist</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+          {wishlist.length} {wishlist.length === 1 ? 'Item' : 'Items'}
+        </Text>
+      </View>
       <FlatList
         data={wishlist}
         keyExtractor={item => item.id}
@@ -47,7 +44,6 @@ export default function WishlistScreen() {
           wishlist.length === 0 && { flex: 1 }
         ]}
         columnWrapperStyle={styles.productRow}
-        ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
         renderItem={({ item }) => (
           <View style={styles.productCell}>
