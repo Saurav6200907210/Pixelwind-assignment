@@ -484,36 +484,6 @@ export default function HomeScreen() {
 
   const renderHeader = () => (
     <View>
-      <View style={styles.headerContainer}>
-        <View style={styles.topRow}>
-          <View style={styles.headerTextContainer}>
-            <Text style={[styles.brandLabel, { color: theme.colors.textSecondary }]}>
-              VELORA
-            </Text>
-            <Text style={[styles.mainHeading, { color: theme.colors.textPrimary }]}>
-              Elevate Your Everyday
-            </Text>
-            <Text style={[styles.subheading, { color: theme.colors.textSecondary }]}>
-              Curated products. Exceptional choices.
-            </Text>
-          </View>
-          <View style={[styles.avatar, { backgroundColor: theme.colors.surfaceSecondary }]}>
-            <Image 
-              source={require('../../assets/images/premium_bag.jpg')}
-              style={styles.avatarImage}
-              resizeMode="cover"
-            />
-          </View>
-        </View>
-        
-        <SearchBar 
-          value={searchQuery} 
-          onChangeText={setSearchQuery} 
-          onClear={() => setSearchQuery('')} 
-          onFilterPress={() => setIsFilterModalVisible(true)}
-          filtersActive={hasActiveFilters}
-        />
-      </View>
 
       {(!searchQuery && !hasAdvancedFilters) ? (
         <View>
@@ -620,6 +590,37 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background, zIndex: 10, paddingBottom: spacing.sm }]}>
+        <View style={styles.topRow}>
+          <View style={styles.headerTextContainer}>
+            <Text style={[styles.brandLabel, { color: theme.colors.textSecondary }]}>
+              VELORA
+            </Text>
+            <Text style={[styles.mainHeading, { color: theme.colors.textPrimary }]}>
+              Elevate Your Everyday
+            </Text>
+            <Text style={[styles.subheading, { color: theme.colors.textSecondary }]}>
+              Curated products. Exceptional choices.
+            </Text>
+          </View>
+          <View style={[styles.avatar, { backgroundColor: theme.colors.surfaceSecondary }]}>
+            <Image 
+              source={require('../../assets/images/premium_bag.jpg')}
+              style={styles.avatarImage}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+        
+        <SearchBar 
+          value={searchQuery} 
+          onChangeText={setSearchQuery} 
+          onClear={() => setSearchQuery('')} 
+          onFilterPress={() => setIsFilterModalVisible(true)}
+          filtersActive={hasActiveFilters}
+        />
+      </View>
+
       <FlatList
         ref={flatListRef}
         style={{ flex: 1 }}
