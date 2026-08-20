@@ -1,15 +1,31 @@
-import React from 'react';
-import { View, StyleSheet, Text, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Modal, Switch, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import SectionHeader from '../../components/SectionHeader';
 import ThemeSelector from '../../components/ThemeSelector';
 import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
-import Constants from 'expo-constants';
 
 export default function SettingsScreen() {
   const { theme } = useTheme();
+  
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  
+  const [languageOpen, setLanguageOpen] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('@notifications_enabled').then(val => {
+      if (val !== null) setNotificationsEnabled(val === 'true');
+    });
+  }, []);
+
+  const toggleNotifications = async (val) => {
+    setNotificationsEnabled(val);
+    await AsyncStorage.setItem('@notifications_enabled', val.toString());
+  };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -26,47 +42,70 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <SectionHeader title="App Preferences" />
         <View style={[styles.infoCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-          <View style={styles.infoRow}>
+          <TouchableOpacity style={styles.infoRow} activeOpacity={0.7} onPress={() => setNotificationsOpen(true)}>
             <View style={styles.infoRowLeft}>
-              <Ionicons name="notifications" size={22} color={theme.colors.primary} style={styles.infoIcon} />
-              <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]}>Notifications</Text>
+              <View style={[styles.settingIconBox, { backgroundColor: `${theme.colors.primary}15` }]}>
+                <Ionicons name="notifications" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]} numberOfLines={1}>Notifications</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-          </View>
+          </TouchableOpacity>
           <View style={styles.divider} />
-          <View style={styles.infoRow}>
+          <TouchableOpacity style={styles.infoRow} activeOpacity={0.7} onPress={() => setLanguageOpen(true)}>
             <View style={styles.infoRowLeft}>
-              <Ionicons name="globe" size={22} color={theme.colors.primary} style={styles.infoIcon} />
-              <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]}>Language & Region</Text>
+              <View style={[styles.settingIconBox, { backgroundColor: `${theme.colors.primary}15` }]}>
+                <Ionicons name="globe" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]} numberOfLines={1}>Language & Region</Text>
             </View>
-            <Text style={[styles.infoValue, { color: theme.colors.textSecondary }]}>English (US)</Text>
-          </View>
+            <View style={styles.infoRowRight}>
+              <Text style={[styles.infoValue, { color: theme.colors.textSecondary, marginRight: 8 }]} numberOfLines={1}>English (US)</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <SectionHeader title="About" />
-        <View style={[styles.infoCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]}>Version</Text>
-            <Text style={[styles.infoValue, { color: theme.colors.textSecondary }]}>{Constants.expoConfig?.version || '1.0.0'}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]}>Terms of Service</Text>
-            <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.colors.textPrimary }]}>Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-          </View>
-        </View>
-      </View>
-      
-      <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
-        Made with ❤️ for UI/UX Evaluation
-      </Text>
+      <Modal visible={notificationsOpen} transparent animationType="fade" onRequestClose={() => setNotificationsOpen(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setNotificationsOpen(false)}>
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>Notifications</Text>
+              <TouchableOpacity onPress={() => setNotificationsOpen(false)} style={styles.closeBtn}>
+                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.modalRow}>
+              <Text style={[styles.modalLabel, { color: theme.colors.textPrimary }]}>Enable Notifications</Text>
+              <Switch 
+                value={notificationsEnabled} 
+                onValueChange={toggleNotifications}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor="#FFF"
+              />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal visible={languageOpen} transparent animationType="fade" onRequestClose={() => setLanguageOpen(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setLanguageOpen(false)}>
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>Language & Region</Text>
+              <TouchableOpacity onPress={() => setLanguageOpen(false)} style={styles.closeBtn}>
+                <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.modalRow} onPress={() => setLanguageOpen(false)}>
+              <Text style={[styles.modalLabel, { color: theme.colors.textPrimary }]}>English (US)</Text>
+              <Ionicons name="checkmark" size={24} color={theme.colors.primary} />
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
     </ScrollView>
   );
 }
@@ -111,10 +150,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
   },
   infoRowLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight: spacing.sm,
   },
-  infoIcon: {
+  infoRowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+  },
+  settingIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: spacing.md,
   },
   divider: {
@@ -131,10 +182,45 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     fontWeight: typography.weights.medium,
   },
-  footerText: {
-    textAlign: 'center',
-    fontSize: typography.sizes.sm,
-    marginTop: spacing.sm,
-    marginBottom: spacing.xxl * 2,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  modalContent: {
+    width: '100%',
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: spacing.lg,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  modalTitle: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  modalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  modalLabel: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.medium,
   }
 });

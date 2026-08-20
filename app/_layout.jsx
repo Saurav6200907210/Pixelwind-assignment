@@ -19,11 +19,11 @@ export default function RootLayout() {
 }
 
 function AppWrapper() {
-  const { theme, themeMode } = useTheme();
+  const { theme } = useTheme();
   
   return (
-    <View style={[styles.rootContainer, { backgroundColor: themeMode === 'dark' ? '#000' : '#E5E5E5' }]}>
-      <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
+    <View style={[styles.rootContainer, { backgroundColor: theme.dark ? '#000' : '#E5E5E5' }]}>
+      <StatusBar style={theme.dark ? 'light' : 'dark'} />
       <View style={[styles.appContainer, { backgroundColor: theme.colors.background }]}>
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.background } }}>
           <Stack.Screen name="(tabs)" />

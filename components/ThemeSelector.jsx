@@ -23,38 +23,37 @@ export default function ThemeSelector() {
             key={option.value}
             style={[
               styles.option,
-              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-              isSelected && { borderColor: theme.colors.primary, borderWidth: 2 }
+              { backgroundColor: isSelected ? `${theme.colors.primary}08` : theme.colors.surface, borderColor: isSelected ? theme.colors.primary : theme.colors.border }
             ]}
             onPress={() => setThemeMode(option.value)}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
             <View style={styles.leftSide}>
               <View style={[styles.iconBox, { backgroundColor: isSelected ? theme.colors.primary : theme.colors.surfaceSecondary }]}>
                 <Ionicons 
                   name={option.icon} 
-                  size={22} 
+                  size={20} 
                   color={isSelected ? '#FFF' : theme.colors.textSecondary} 
                 />
               </View>
               <View style={styles.textContainer}>
                 <Text style={[
                   styles.label, 
-                  { color: theme.colors.textPrimary },
-                  isSelected && { fontWeight: typography.weights.bold }
-                ]}>
+                  { color: isSelected ? theme.colors.primary : theme.colors.textPrimary },
+                ]} numberOfLines={1}>
                   {option.label}
                 </Text>
-                <Text style={[styles.desc, { color: theme.colors.textSecondary }]}>
+                <Text style={[styles.desc, { color: theme.colors.textSecondary }]} numberOfLines={1}>
                   {option.desc}
                 </Text>
               </View>
             </View>
             <View style={[
               styles.radio, 
-              { borderColor: isSelected ? theme.colors.primary : theme.colors.border }
+              { borderColor: isSelected ? theme.colors.primary : theme.colors.border },
+              isSelected && { backgroundColor: theme.colors.primary }
             ]}>
-              {isSelected && <View style={[styles.radioInner, { backgroundColor: theme.colors.primary }]} />}
+              {isSelected && <Ionicons name="checkmark" size={14} color="#FFF" />}
             </View>
           </TouchableOpacity>
         );
@@ -81,8 +80,10 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   leftSide: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight: spacing.sm,
   },
   iconBox: {
     width: 44,
@@ -92,6 +93,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textContainer: {
+    flex: 1,
     marginLeft: spacing.md,
   },
   label: {
@@ -103,16 +105,11 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
   },
   radio: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
   }
 });
